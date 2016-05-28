@@ -37,6 +37,47 @@ Suites.push({
 });
 
 Suites.push({
+    name: 'Polymer',
+    url: 'todomvc/polymer/index.html',
+    version: '1.2.3',
+    prepare: function (runner, contentWindow, contentDocument) {
+        return runner.waitForElement('td-todos').then(function (element) {
+            var el2 = element.$['new-todo'];
+            el2.focus();          
+            return el2;
+        });
+    },
+    tests: [
+        new BenchmarkTestStep('Adding' + numberOfItemsToAdd + 'Items', function (newTodo, contentWindow, contentDocument) {
+            for (var i = 0; i < numberOfItemsToAdd; i++) {
+                var keypressEvent = document.createEvent('Event');
+                keypressEvent.initEvent('keypress', true, true);
+                keypressEvent.which = 13;
+                keypressEvent.keyCode = 13;
+                newTodo.value = 'Something to do ' + i;
+                //newTodo.dispatchEvent(keypressEvent)
+                newTodo._keypressAction(keypressEvent)
+            }
+        }),
+        new BenchmarkTestStep('CompletingAllItems', function (newTodo, contentWindow, contentDocument) {
+            var lis = contentDocument
+                .querySelector('td-todos')
+                .querySelectorAll('#todo-list li');
+            console.log(lis);
+            for (var i = 0; i < lis.length; i++)
+                lis[i].querySelector('.toggle').click();
+        }),
+        new BenchmarkTestStep('DeletingAllItems', function (newTodo, contentWindow, contentDocument) {
+            var deleteButtons = contentDocument
+                .querySelector('td-todos')
+                .querySelectorAll('#todo-list li');
+            for (var i = 0; i < deleteButtons.length; i++)
+                deleteButtons[i].querySelector('.destroy').click();
+        })
+    ]
+});
+
+Suites.push({
     name: 'Ember',
     url: 'todomvc/emberjs/index.html',
     version: '1.4.0 + Handlebars 1.3.0',
